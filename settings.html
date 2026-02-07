@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GCal Appointment Saver — Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <h1>GCal Appointment Saver</h1>
+    <p class="subtitle">Configure your AI provider for free-text parsing. ICS data works without an API key.</p>
+
+    <div class="field-group">
+      <label for="provider">AI Provider</label>
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI (GPT)</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="api-key">API Key</label>
+      <input type="password" id="api-key" placeholder="Enter your API key">
+      <p class="hint" id="key-hint">Get your key from console.anthropic.com</p>
+    </div>
+
+    <button id="save-btn">Save Settings</button>
+    <div id="status" class="status" style="display:none;"></div>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>
