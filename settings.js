@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     keyHint.textContent = hints[providerSelect.value];
   });
 
+  const testBtn = document.getElementById('test-btn');
+
   saveBtn.addEventListener('click', async () => {
     const apiKey = apiKeyInput.value.trim();
     const provider = providerSelect.value;
@@ -29,18 +31,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Soft validation — warn but still save
-    if (provider === 'anthropic' && !apiKey.startsWith('sk-ant-')) {
-      showStatus('Saved! Note: Anthropic keys usually start with "sk-ant-".', 'warning');
-    } else if (provider === 'openai' && !apiKey.startsWith('sk-')) {
-      showStatus('Saved! Note: OpenAI keys usually start with "sk-".', 'warning');
-    }
-
     await chrome.storage.sync.set({ apiKey, provider });
+    showStatus('Settings saved!', 'success');
+  });
 
-    if (!statusEl.classList.contains('warning')) {
-      showStatus('Settings saved!', 'success');
+  testBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
+    const provider = providerSelect.value;
+
+    if (!apiKey) {
+      showStatus('Please enter an API key first.', 'error');
+      return;
     }
+
+    testBtn.disabled = true;
+    showStatus('Testing...', 'success');
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'TEST_API_KEY',
+        apiKey,
+        provider
+      });
+
+      if (response && response.success) {
+        showStatus('Key works! API call succeeded.', 'success');
+      } else {
+        showStatus(response?.error || 'Test failed — unknown error.', 'error');
+      }
+    } catch (err) {
+      showStatus('Could not reach service worker: ' + err.message, 'error');
+    }
+
+    testBtn.disabled = false;
   });
 
   function showStatus(msg, type) {

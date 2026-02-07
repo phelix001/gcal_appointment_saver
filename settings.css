@@ -65,12 +65,15 @@ select:focus, input:focus {
   margin-top: 4px;
 }
 
-#save-btn {
-  width: 100%;
-  padding: 10px;
+.btn-row {
+  display: flex;
+  gap: 8px;
   margin-top: 4px;
-  background: #1a73e8;
-  color: white;
+}
+
+#save-btn, #test-btn {
+  flex: 1;
+  padding: 10px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -80,8 +83,23 @@ select:focus, input:focus {
   transition: background 0.15s;
 }
 
-#save-btn:hover {
-  background: #1557b0;
+#save-btn {
+  background: #1a73e8;
+  color: white;
+}
+
+#save-btn:hover { background: #1557b0; }
+
+#test-btn {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+#test-btn:hover { background: #d2e3fc; }
+
+#test-btn:disabled, #save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .status {

@@ -35,15 +35,25 @@
   const status = document.getElementById('gcal-saver-status');
   const closeBtn = document.getElementById('gcal-saver-close');
 
-  // --- Handle paste: allow multiline paste into the single-line input ---
+  // Store raw pasted text here since <input type="text"> strips newlines
+  let rawPastedText = '';
+
+  // --- Handle paste: capture raw text before input strips newlines ---
   input.addEventListener('paste', (e) => {
     e.preventDefault();
     const pasted = (e.clipboardData || window.clipboardData).getData('text');
-    input.value = pasted;
+    rawPastedText = pasted;
+    // Show truncated preview in the input field
+    input.value = pasted.replace(/[\r\n]+/g, ' ').substring(0, 500);
     // Auto-trigger if it looks like ICS data
     if (window.ICSParser.isICS(pasted)) {
       handleAdd();
     }
+  });
+
+  // Clear raw text when user types manually
+  input.addEventListener('input', () => {
+    rawPastedText = '';
   });
 
   // --- Enter key triggers add ---
@@ -73,7 +83,8 @@
 
   // --- Main handler ---
   async function handleAdd() {
-    const text = input.value.trim();
+    // Use raw pasted text (preserves newlines) or fall back to input value
+    const text = (rawPastedText || input.value).trim();
     if (!text) {
       showStatus('Paste some appointment info first.', true);
       return;
@@ -86,26 +97,19 @@
       let eventData;
 
       if (window.ICSParser.isICS(text)) {
-        // ICS path — instant, no API key needed
-        eventData = window.ICSParser.parse(text);
-        showStatus('ICS parsed!');
-      } else {
-        // Free text path — send to AI via background service worker
-        showStatus('AI is reading your text...');
-        const response = await chrome.runtime.sendMessage({
-          type: 'PARSE_APPOINTMENT',
-          text: text
-        });
-
-        if (!response || !response.success) {
-          const errMsg = response?.error || 'No response from extension. Try reloading.';
-          showStatus(errMsg, true);
-          addBtn.disabled = false;
-          return;
+        // ICS path — try client-side parsing first
+        try {
+          eventData = window.ICSParser.parse(text);
+          showStatus('ICS parsed!');
+        } catch (icsErr) {
+          // ICS parsing failed — fall back to AI
+          showStatus('ICS parse failed, sending to AI...');
+          eventData = await parseWithAI(text);
         }
-
-        eventData = response.data.eventData;
-        showStatus('Parsed!');
+      } else {
+        // Free text path — send to AI
+        showStatus('AI is reading your text...');
+        eventData = await parseWithAI(text);
       }
 
       // Generate Google Calendar URL and open it
@@ -114,11 +118,25 @@
 
       showStatus(`Opening: ${eventData.title}`);
       input.value = '';
+      rawPastedText = '';
     } catch (err) {
       showStatus(err.message || 'Failed to parse. Try again.', true);
     }
 
     addBtn.disabled = false;
+  }
+
+  async function parseWithAI(text) {
+    const response = await chrome.runtime.sendMessage({
+      type: 'PARSE_APPOINTMENT',
+      text: text
+    });
+
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'No response from extension. Try reloading.');
+    }
+
+    return response.data.eventData;
   }
 
   function showStatus(msg, isError) {
