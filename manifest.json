@@ -4,12 +4,24 @@
   "version": "1.0.0",
   "description": "Paste appointment info into Google Calendar — AI or ICS parsing creates the event for you.",
   "permissions": [
-    "storage"
+    "storage",
+    "identity"
   ],
   "host_permissions": [
     "https://api.anthropic.com/*",
-    "https://api.openai.com/*"
+    "https://api.openai.com/*",
+    "https://www.googleapis.com/*",
+    "https://www.google.com/*",
+    "https://html.duckduckgo.com/*"
   ],
+  "oauth2": {
+    "client_id": "466309922148-kp2pitscaj096nca34chrb5s1vbjqmrh.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.events.readonly",
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3FvoediDODYe5sSFzufyIlSAuzPjQ+otGBG59PNqMxMQTt3c6SSHCb0KOm5xLRPaB1E0281TdnWKfh+2Beih7AmW0YKw2F6dDDs/WoaMLskX/SX+QGzKz8Upsmi8nPgUi2yfRtqReBEK3lXBno23WLrLWlwjVvtOx4Q/7hSmJFYHK4zJsjhs2qevHM6bl6rVGYVbo//ny6qwYs21etn510kUt6bby+AU1x4zbIWz4/UPVp2qijW3rJZvUC2oiG8L6ehBfXUsTFHIGSV8elNPYsUz6oOvKdAgQ/2q7YoQTbTNbdPBieTqju+oKeTUXwVKJ592EQ/iyF0wcWMrxRCAoQIDAQAB",
   "background": {
     "service_worker": "background.js",
     "type": "module"

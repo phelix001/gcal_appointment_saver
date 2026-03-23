@@ -138,7 +138,379 @@
   background: #1557b0;
 }
 
+/* Prep button */
+#gcal-saver-bar .gcal-saver-btn-prep {
+  display: inline-flex;
+  align-items: center;
+  border-color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+#gcal-saver-bar .gcal-saver-btn-prep:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: white;
+}
+
+#gcal-saver-bar .gcal-saver-btn-prep.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 /* Push Google Calendar content down to avoid overlap */
 body.gcal-saver-active {
   padding-top: 42px !important;
+}
+
+/* Push calendar content left when dossier panel is open */
+body.gcal-dossier-active {
+  margin-right: 420px !important;
+  transition: margin-right 0.3s ease;
+}
+
+/* ==========================================================================
+   Dossier Panel
+   ========================================================================== */
+
+#gcal-dossier-panel {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 420px;
+  height: 100vh;
+  z-index: 99997;
+  background: #f8f9fa;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.12);
+  font-family: 'Google Sans', Roboto, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+  overflow: hidden;
+}
+
+#gcal-dossier-panel.open {
+  right: 0;
+}
+
+/* Header */
+.dossier-header {
+  padding: 16px 20px 12px;
+  background: #1a73e8;
+  color: white;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dossier-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.dossier-date {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.dossier-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.dossier-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Scrollable body */
+.dossier-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Sections */
+.dossier-section {
+  margin-bottom: 20px;
+}
+
+.dossier-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5f6368;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #dadce0;
+}
+
+/* Event cards */
+.dossier-event-card {
+  background: white;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-left: 3px solid #1a73e8;
+}
+
+.dossier-event-time {
+  font-size: 11px;
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.dossier-event-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-top: 2px;
+}
+
+.dossier-event-attendees {
+  font-size: 11px;
+  color: #80868b;
+  margin-top: 2px;
+}
+
+/* Person cards */
+.dossier-person-card {
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.dossier-person-header {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.dossier-person-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dossier-person-email {
+  font-size: 12px;
+  color: #5f6368;
+  margin-top: 1px;
+}
+
+.dossier-person-meetings {
+  font-size: 11px;
+  color: #80868b;
+  margin-top: 4px;
+}
+
+.dossier-person-body {
+  padding: 12px 14px;
+}
+
+.dossier-person-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #80868b;
+  font-size: 12px;
+  padding: 14px;
+}
+
+.dossier-person-error {
+  background: #fce8e6;
+}
+
+.dossier-error-text {
+  color: #c5221f;
+  font-size: 12px;
+}
+
+.dossier-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3c4043;
+}
+
+.dossier-content strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.dossier-link {
+  color: #1a73e8;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.dossier-link:hover {
+  text-decoration: underline;
+}
+
+/* Error banner */
+.dossier-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fce8e6;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #c5221f;
+}
+
+.dossier-error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Loading states */
+.dossier-loading-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  color: #5f6368;
+  font-size: 13px;
+}
+
+/* Spinner — main */
+.dossier-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #dadce0;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: dossier-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Spinner — small (in person cards) */
+.dossier-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #dadce0;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: dossier-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes dossier-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Add to Contacts button */
+.dossier-actions {
+  padding: 8px 14px 12px;
+  border-top: 1px solid #f1f3f4;
+  display: flex;
+  gap: 8px;
+}
+
+.dossier-add-contact-btn {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #1a73e8;
+  background: #e8f0fe;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dossier-add-contact-btn:hover {
+  background: #d2e3fc;
+}
+
+.dossier-add-contact-btn.saved {
+  background: #e6f4ea;
+  color: #137333;
+  cursor: default;
+}
+
+.dossier-add-contact-btn:disabled {
+  opacity: 0.7;
+}
+
+/* Skip / Undo controls */
+.dossier-skip-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #5f6368;
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dossier-skip-btn:hover {
+  background: #fce8e6;
+  color: #c5221f;
+  border-color: #f5c6cb;
+}
+
+.dossier-person-header {
+  position: relative;
+}
+
+.dossier-undo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fef7e0;
+  border: 1px solid #fdd835;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #5f6368;
+  animation: dossier-fade-in 0.2s ease;
+}
+
+.dossier-undo-bar strong {
+  color: #3c4043;
+}
+
+.dossier-undo-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #1a73e8;
+  background: white;
+  border: 1px solid #1a73e8;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.dossier-undo-btn:hover {
+  background: #e8f0fe;
+}
+
+@keyframes dossier-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

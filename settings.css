@@ -113,3 +113,84 @@ select:focus, input:focus {
 .status.success { background: #e6f4ea; color: #137333; }
 .status.error { background: #fce8e6; color: #c5221f; }
 .status.warning { background: #fef7e0; color: #b06000; }
+
+/* Section divider */
+.section-divider {
+  border: none;
+  border-top: 1px solid #dadce0;
+  margin: 24px 0;
+}
+
+h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a73e8;
+  margin-bottom: 4px;
+}
+
+/* Textarea for exclusion list */
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: white;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+textarea:focus {
+  border-color: #1a73e8;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.15);
+}
+
+/* Reset button style */
+#reset-exclusions-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: #f1f3f4;
+  color: #3c4043;
+}
+
+#reset-exclusions-btn:hover { background: #e8eaed; }
+
+#save-exclusions-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: #1a73e8;
+  color: white;
+}
+
+#save-exclusions-btn:hover { background: #1557b0; }
+
+#save-search-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: #1a73e8;
+  color: white;
+}
+
+#save-search-btn:hover { background: #1557b0; }
