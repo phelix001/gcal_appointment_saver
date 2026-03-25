@@ -315,11 +315,41 @@ function clearCachedToken() {
 }
 
 /**
- * Fetch today's events from Google Calendar API.
- * Returns an array of event objects with attendees.
+ * Fetch the user's calendar list (all visible calendars).
+ */
+async function fetchCalendarList(token) {
+  const response = await fetch(
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+    { headers: { 'Authorization': `Bearer ${token}` } }
+  );
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Calendar list API error: ${response.status}`);
+  }
+  const data = await response.json();
+  return (data.items || []).filter(cal => !cal.hidden && cal.selected !== false);
+}
+
+/**
+ * Fetch today's events from ALL visible Google Calendars.
+ * Returns a deduplicated array of event objects with attendees.
  */
 async function fetchTodaysEvents(retried = false) {
   const token = await getCalendarToken();
+
+  // Fetch calendar list first
+  let calendars;
+  try {
+    calendars = await fetchCalendarList(token);
+  } catch (err) {
+    if (err.message.includes('401') && !retried) {
+      clearCachedToken();
+      return fetchTodaysEvents(true);
+    }
+    // Fallback: if calendar list fails, try primary only
+    console.warn('Calendar list fetch failed, falling back to primary:', err.message);
+    calendars = [{ id: 'primary' }];
+  }
 
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -332,36 +362,70 @@ async function fetchTodaysEvents(retried = false) {
     orderBy: 'startTime'
   });
 
-  const response = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params.toString()}`,
-    {
-      headers: { 'Authorization': `Bearer ${token}` }
-    }
+  // Fetch events from all calendars in parallel
+  const results = await Promise.allSettled(
+    calendars.map(cal =>
+      fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal.id)}/events?${params.toString()}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      ).then(async response => {
+        if (!response.ok) {
+          if (response.status === 401 && !retried) {
+            throw new Error('401');
+          }
+          return []; // Skip calendars we can't read
+        }
+        const data = await response.json();
+        return (data.items || []).map(event => ({
+          id: event.id,
+          calendarId: cal.id,
+          title: event.summary || '(No title)',
+          start: event.start?.dateTime || event.start?.date || '',
+          end: event.end?.dateTime || event.end?.date || '',
+          attendees: (event.attendees || []).map(a => ({
+            name: a.displayName || '',
+            email: a.email || '',
+            self: a.self || false,
+            responseStatus: a.responseStatus || 'needsAction'
+          }))
+        }));
+      })
+    )
   );
 
-  if (!response.ok) {
-    if (response.status === 401 && !retried) {
-      // Token expired — clear cache and retry once
-      clearCachedToken();
-      return fetchTodaysEvents(true);
-    }
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Google Calendar API error: ${response.status}`);
+  // Check for 401 on any calendar — retry once with fresh token
+  const got401 = results.some(r => r.status === 'rejected' && r.reason?.message === '401');
+  if (got401 && !retried) {
+    clearCachedToken();
+    return fetchTodaysEvents(true);
   }
 
-  const data = await response.json();
-  return (data.items || []).map(event => ({
-    id: event.id,
-    title: event.summary || '(No title)',
-    start: event.start?.dateTime || event.start?.date || '',
-    end: event.end?.dateTime || event.end?.date || '',
-    attendees: (event.attendees || []).map(a => ({
-      name: a.displayName || '',
-      email: a.email || '',
-      self: a.self || false,
-      responseStatus: a.responseStatus || 'needsAction'
-    }))
-  }));
+  // Merge and deduplicate events across calendars (same event ID = same event)
+  const eventMap = new Map();
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    for (const event of result.value) {
+      // Use iCalUID-like dedup: same title + same start time = same event
+      const dedupKey = `${event.title}|${event.start}`;
+      if (!eventMap.has(dedupKey)) {
+        eventMap.set(dedupKey, event);
+      } else {
+        // Merge attendees from duplicate event entries
+        const existing = eventMap.get(dedupKey);
+        for (const att of event.attendees) {
+          const alreadyHas = existing.attendees.some(a => a.email === att.email);
+          if (!alreadyHas) {
+            existing.attendees.push(att);
+          }
+        }
+      }
+    }
+  }
+
+  // Return sorted by start time
+  return Array.from(eventMap.values()).sort((a, b) => {
+    return new Date(a.start) - new Date(b.start);
+  });
 }
 
 /**
