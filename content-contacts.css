@@ -1,0 +1,260 @@
+/* Google Contacts Saver — injected paste bar */
+
+#gcontact-saver-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #1b72e8;
+  font-family: 'Google Sans', Roboto, -apple-system, sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+#gcontact-saver-bar.gcontact-saver-collapsed {
+  transform: translateY(-100%);
+}
+
+#gcontact-saver-bar .gcontact-saver-icon {
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+#gcontact-saver-bar .gcontact-saver-input {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  outline: none;
+  min-width: 0;
+}
+
+#gcontact-saver-bar .gcontact-saver-input::placeholder {
+  color: #80868b;
+}
+
+#gcontact-saver-bar .gcontact-saver-input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+#gcontact-saver-bar .gcontact-saver-btn {
+  padding: 6px 16px;
+  border: 2px solid white;
+  border-radius: 20px;
+  background: transparent;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+#gcontact-saver-bar .gcontact-saver-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#gcontact-saver-bar .gcontact-saver-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#gcontact-saver-bar .gcontact-saver-btn-add {
+  background: white;
+  color: #1b72e8;
+  border-color: white;
+  font-weight: 600;
+}
+
+#gcontact-saver-bar .gcontact-saver-btn-add:hover {
+  background: #e8f0fe;
+}
+
+#gcontact-saver-bar .gcontact-saver-status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#gcontact-saver-bar .gcontact-saver-status.error {
+  color: #ffcdd2;
+}
+
+#gcontact-saver-bar .gcontact-saver-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+#gcontact-saver-bar .gcontact-saver-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Toggle button shown when bar is collapsed */
+#gcontact-saver-toggle {
+  position: fixed;
+  top: 8px;
+  right: 16px;
+  z-index: 99998;
+  padding: 4px 12px;
+  background: #1b72e8;
+  color: white;
+  border: none;
+  border-radius: 0 0 8px 8px;
+  font-size: 12px;
+  font-family: 'Google Sans', Roboto, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#gcontact-saver-toggle.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#gcontact-saver-toggle:hover {
+  background: #1557b0;
+}
+
+/* Push Google Contacts content down to avoid overlap */
+body.gcontact-saver-active {
+  padding-top: 42px !important;
+}
+
+/* --- Parsed contact info card --- */
+#gcontact-saver-card {
+  position: fixed;
+  top: 50px;
+  right: 16px;
+  z-index: 100000;
+  width: 360px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  font-family: 'Google Sans', Roboto, -apple-system, sans-serif;
+  overflow: hidden;
+  animation: gcontact-card-in 0.2s ease;
+}
+
+@keyframes gcontact-card-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#gcontact-saver-card .gcontact-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1b72e8;
+  color: white;
+}
+
+#gcontact-saver-card .gcontact-card-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#gcontact-saver-card .gcontact-card-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+#gcontact-saver-card .gcontact-card-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#gcontact-saver-card .gcontact-card-body {
+  padding: 12px 16px;
+}
+
+#gcontact-saver-card .gcontact-card-row {
+  display: flex;
+  align-items: baseline;
+  padding: 4px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#gcontact-saver-card .gcontact-card-label {
+  width: 80px;
+  flex-shrink: 0;
+  color: #5f6368;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#gcontact-saver-card .gcontact-card-value {
+  flex: 1;
+  color: #202124;
+  word-break: break-word;
+}
+
+#gcontact-saver-card .gcontact-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e8eaed;
+}
+
+#gcontact-saver-card .gcontact-card-actions button {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+#gcontact-saver-card .gcontact-card-btn-create {
+  background: #1b72e8;
+  color: white;
+  border: none;
+}
+
+#gcontact-saver-card .gcontact-card-btn-create:hover {
+  background: #1557b0;
+}
+
+#gcontact-saver-card .gcontact-card-btn-copy {
+  background: white;
+  color: #1b72e8;
+  border: 2px solid #1b72e8;
+}
+
+#gcontact-saver-card .gcontact-card-btn-copy:hover {
+  background: #e8f0fe;
+}

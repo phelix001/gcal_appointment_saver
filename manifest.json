@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "GCal Appointment Saver",
   "version": "1.0.0",
-  "description": "Paste appointment info into Google Calendar — AI or ICS parsing creates the event for you.",
+  "description": "Paste appointment or contact info into Google Calendar/Contacts — AI parsing creates events and contacts for you.",
   "permissions": [
     "storage",
     "identity"
@@ -31,6 +31,12 @@
       "matches": ["https://calendar.google.com/*"],
       "js": ["utils/ics-parser.js", "utils/calendar-url.js", "content.js"],
       "css": ["content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://contacts.google.com/*"],
+      "js": ["utils/vcf-parser.js", "content-contacts.js"],
+      "css": ["content-contacts.css"],
       "run_at": "document_idle"
     }
   ],

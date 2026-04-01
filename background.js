@@ -20,6 +20,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'PARSE_CONTACT') {
+    handleParseContact(message.text)
+      .then(result => sendResponse({ success: true, data: result }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
   if (message.type === 'TEST_API_KEY') {
     testApiKey(message.apiKey, message.provider)
       .then(result => sendResponse({ success: true, data: result }))
@@ -1154,4 +1161,79 @@ async function lookupContact(email) {
   const stored = await chrome.storage.local.get(['contacts']);
   const contacts = stored.contacts || {};
   return contacts[email.toLowerCase()] || null;
+}
+
+// =============================================================================
+// Contact Parsing (for contacts.google.com paste bar)
+// =============================================================================
+
+async function handleParseContact(rawText) {
+  const settings = await chrome.storage.sync.get(['apiKey', 'provider']);
+
+  if (!settings.apiKey) {
+    throw new Error('No API key configured. Right-click the extension icon → Options to set one up.');
+  }
+
+  const prompt = buildContactPrompt(rawText);
+  const provider = settings.provider || 'anthropic';
+
+  let aiText;
+  if (provider === 'openai') {
+    aiText = await callOpenAI(settings.apiKey, prompt);
+  } else {
+    aiText = await callAnthropic(settings.apiKey, prompt);
+  }
+
+  const contactData = parseContactResponse(aiText);
+  return { contactData };
+}
+
+function buildContactPrompt(rawText) {
+  return `You are a contact information extractor. Extract whatever contact details you can from the text below. The text may be well-structured or very messy — do your best.
+
+Return ONLY a JSON object (no markdown, no code fences, no explanation):
+{
+  "firstName": "First name or empty string",
+  "lastName": "Last name or empty string",
+  "email": "Email address or empty string",
+  "phone": "Phone number or empty string",
+  "organization": "Company/Organization or empty string",
+  "title": "Job title/role or empty string",
+  "address": "Address or empty string",
+  "website": "Website URL or empty string",
+  "notes": "Any additional context, relationship info, or details that don't fit other fields"
+}
+
+Rules:
+- Extract as much as you can. Leave empty string for truly unknown fields.
+- For names with titles/honorifics (Dr., Mr., Prof.), include the title as part of firstName.
+- If only a full name is given, split intelligently (first vs last).
+- Phone numbers: keep original format.
+- Organization and title are separate — org is the company/institution, title is the person's role.
+- If the text mentions a relationship or context (e.g., "Dad's doctor", "met at conference"), put that in notes.
+- If you see a department or sub-unit (e.g., "UPMC West Shore — Hospital Medicine"), include the full thing in organization.
+- Do NOT invent information that isn't in the text.
+
+Text to parse:
+"""
+${rawText}
+"""`;
+}
+
+function parseContactResponse(responseText) {
+  let cleaned = responseText.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+  }
+
+  const parsed = JSON.parse(cleaned);
+
+  // At minimum we need a name or email
+  const hasName = parsed.firstName || parsed.lastName;
+  const hasEmail = parsed.email;
+  if (!hasName && !hasEmail) {
+    throw new Error('Could not extract a name or email from that text. Try adding more detail.');
+  }
+
+  return parsed;
 }
