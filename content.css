@@ -156,9 +156,16 @@
   cursor: wait;
 }
 
-/* Push Google Calendar content down to avoid overlap */
+/* Push Google Calendar content down to avoid overlap.
+   Google Calendar mounts its app inside #yDmH0d (position:absolute, top:0),
+   which ignores body padding — so shift the container directly. */
 body.gcal-saver-active {
   padding-top: 42px !important;
+}
+body.gcal-saver-active > #yDmH0d {
+  top: 42px !important;
+  bottom: 0 !important;
+  height: auto !important;
 }
 
 /* Push calendar content left when dossier panel is open */

@@ -138,9 +138,16 @@
   background: #1557b0;
 }
 
-/* Push Google Contacts content down to avoid overlap */
+/* Push Google Contacts content down to avoid overlap.
+   Google Contacts mounts its app inside #yDmH0d (position:absolute, top:0),
+   which ignores body padding — so shift the container directly. */
 body.gcontact-saver-active {
   padding-top: 42px !important;
+}
+body.gcontact-saver-active > #yDmH0d {
+  top: 42px !important;
+  bottom: 0 !important;
+  height: auto !important;
 }
 
 /* --- Parsed contact info card --- */
